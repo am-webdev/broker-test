@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 
 import org.junit.Test;
 
@@ -33,35 +34,35 @@ public class AuctionEntityTest extends EntityTest {
 		
 		
 		// Legal Test Cases
-		
+		Validator validator = getEntityValidatorFactory().getValidator();
 		auction1.setAskingPrice(1);
-	    Set<ConstraintViolation<Auction>> constraintViolations = getEntityValidatorFactory().getValidator().validate( auction1 );
+	    Set<ConstraintViolation<Auction>> constraintViolations = validator.validate( auction1 );
 	    assertEquals( 0, constraintViolations.size() );	
 
 		auction1.setAskingPrice(Long.MAX_VALUE);
-		getEntityValidatorFactory().getValidator().validate( auction1 );
+		validator.validate( auction1 );
 	    assertEquals( 0, constraintViolations.size() );
 
 	    auction1.setDescription("x");
-		getEntityValidatorFactory().getValidator().validate( auction1 );
+	    validator.validate( auction1 );
 	    assertEquals( 0, constraintViolations.size() );
 	    //TODO
 		
 		// Negative Test Cases
 
 		auction1.setAskingPrice(0);
-		Set<ConstraintViolation<Auction>> constraintViolationsZero = getEntityValidatorFactory().getValidator().validate( auction1 );
+		Set<ConstraintViolation<Auction>> constraintViolationsZero = validator.validate( auction1 );
 	    assertEquals( 1, constraintViolationsZero.size() );
 	    
 	    auction1.setAskingPrice(-1);
 	    auction1.setUnitCount((short) -1);
-		Set<ConstraintViolation<Auction>> constraintViolationsNeg = getEntityValidatorFactory().getValidator().validate( auction1 );
+		Set<ConstraintViolation<Auction>> constraintViolationsNeg = validator.validate( auction1 );
 	    assertEquals( 2, constraintViolationsNeg.size() );
 	    
 	    auction1.setAskingPrice(1);
 	    auction1.setUnitCount((short) 1);
 	    auction1.setTitle("");
-		Set<ConstraintViolation<Auction>> constraintViolationsEmtpyTitle = getEntityValidatorFactory().getValidator().validate( auction1 );
+		Set<ConstraintViolation<Auction>> constraintViolationsEmtpyTitle = validator.validate( auction1 );
 	    assertEquals( 1, constraintViolationsEmtpyTitle.size() );
 		
 	    // TODO

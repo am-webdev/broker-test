@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 
 import org.junit.Test;
 
@@ -31,26 +32,28 @@ public class BidEntityTest extends EntityTest {
 		// Legal Test Cases
 		Bid legalValueBid = new Bid();
 		
+		Validator validator = getEntityValidatorFactory().getValidator();		
+		
 		legalValueBid.setPrice(1);
-	    Set<ConstraintViolation<Bid>> constraintViolationsMin = getEntityValidatorFactory().getValidator().validate( legalValueBid );
+	    Set<ConstraintViolation<Bid>> constraintViolationsMin = validator.validate( legalValueBid );
 	    assertEquals( 0, constraintViolationsMin.size() );		
 	    
 		legalValueBid.setPrice(Long.MAX_VALUE);
-		Set<ConstraintViolation<Bid>> constraintViolationsMax = getEntityValidatorFactory().getValidator().validate( legalValueBid );
+		Set<ConstraintViolation<Bid>> constraintViolationsMax = validator.validate( legalValueBid );
 	    assertEquals( 0, constraintViolationsMax.size() );		
 		
 		// Negative Test Cases
 		Bid negativValueBid = new Bid();
 		negativValueBid.setPrice(-100);
 
-	    Set<ConstraintViolation<Bid>> constraintViolations1 = getEntityValidatorFactory().getValidator().validate( negativValueBid );
+	    Set<ConstraintViolation<Bid>> constraintViolations1 = validator.validate( negativValueBid );
 	    assertEquals( 1, constraintViolations1.size() );
 		
 		// Price for a bid was set to 0 Test Cases
 		Bid toLowValueBid = new Bid();
 		toLowValueBid.setPrice(0);
 
-	    Set<ConstraintViolation<Bid>> constraintViolations2 = getEntityValidatorFactory().getValidator().validate( toLowValueBid );
+	    Set<ConstraintViolation<Bid>> constraintViolations2 = validator.validate( toLowValueBid );
 	    assertEquals( 1, constraintViolations2.size() );		
 	}
 	
