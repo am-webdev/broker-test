@@ -29,7 +29,7 @@ public class PersonEntityTest extends EntityTest {
 		testPersonDefaultConstructor.setAlias("Bruce Banner");
 		assertEquals("Bruce Banner", testPersonDefaultConstructor.getAlias());
 		testPersonDefaultConstructor.setPasswordHash(Person.passwordHash("password"));
-		assertEquals(Person.passwordHash("password"), testPersonDefaultConstructor.getPasswordHash());
+		assertArrayEquals(Person.passwordHash("password"), testPersonDefaultConstructor.getPasswordHash());
 		testPersonDefaultConstructor.setGroup(Group.ADMIN);
 		assertEquals(Group.ADMIN, testPersonDefaultConstructor.getGroup());
 		testPersonDefaultConstructor.setName(new Name());
@@ -45,23 +45,23 @@ public class PersonEntityTest extends EntityTest {
 		
 		// low bounds
 		testBoundsPerson.setAlias("A");
-		Set<ConstraintViolation<Person>> constraintValidationsPerson = validator.validate(testBoundsPerson);
+		Set<ConstraintViolation<Person>> constraintValidationsPerson = validator.validate(testPersonDefaultConstructor);
 		assertEquals(0, constraintValidationsPerson.size());
 		
 		// in bounds
 		testBoundsPerson.setAlias("Abc");
 		testBoundsPerson.setPasswordHash(Person.passwordHash("someString")); // can we test different cases for that? we have no control over what is in there
-		constraintValidationsPerson = validator.validate(testBoundsPerson);
+		constraintValidationsPerson = validator.validate(testPersonDefaultConstructor);
 		assertEquals(0, constraintValidationsPerson.size());
 		
 		// high bounds
 		testBoundsPerson.setAlias("ABCDEFGHIJKLMNOP");
-		constraintValidationsPerson = validator.validate(testBoundsPerson);
+		constraintValidationsPerson = validator.validate(testPersonDefaultConstructor);
 		assertEquals(0, constraintValidationsPerson.size());
 		
 		// out of bounds
 		testBoundsPerson.setAlias("ABCDEFGHIJKLMNOPQRSTU");
-		constraintValidationsPerson = validator.validate(testBoundsPerson);
+		constraintValidationsPerson = validator.validate(testPersonDefaultConstructor);
 		assertEquals(1, constraintValidationsPerson.size());
 		
 		// ---------------- Name ---------------- 
