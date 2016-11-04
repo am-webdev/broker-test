@@ -44,31 +44,31 @@ public class PersonEntityTest extends EntityTest {
 		Validator validator = this.getEntityValidatorFactory().getValidator();
 		
 		// low bounds
-		testBoundsPerson.setAlias("A");
+		testPersonDefaultConstructor.setAlias("A");
 		Set<ConstraintViolation<Person>> constraintValidationsPerson = validator.validate(testPersonDefaultConstructor);
 		assertEquals(0, constraintValidationsPerson.size());
 		
 		// in bounds
-		testBoundsPerson.setAlias("Abc");
-		testBoundsPerson.setPasswordHash(Person.passwordHash("someString")); // can we test different cases for that? we have no control over what is in there
+		testPersonDefaultConstructor.setAlias("Abc");
+		testPersonDefaultConstructor.setPasswordHash(Person.passwordHash("someString")); // can we test different cases for that? we have no control over what is in there
 		constraintValidationsPerson = validator.validate(testPersonDefaultConstructor);
 		assertEquals(0, constraintValidationsPerson.size());
 		
 		// high bounds
-		testBoundsPerson.setAlias("ABCDEFGHIJKLMNOP");
+		testPersonDefaultConstructor.setAlias("ABCDEFGHIJKLMNOP");
 		constraintValidationsPerson = validator.validate(testPersonDefaultConstructor);
 		assertEquals(0, constraintValidationsPerson.size());
 		
 		// out of bounds
-		testBoundsPerson.setAlias("ABCDEFGHIJKLMNOPQRSTU");
+		testPersonDefaultConstructor.setAlias("ABCDEFGHIJKLMNOPQRSTU");
 		constraintValidationsPerson = validator.validate(testPersonDefaultConstructor);
 		assertEquals(1, constraintValidationsPerson.size());
 		
 		// ---------------- Name ---------------- 
 		Name testName = new Name();
 		// default constructor
-		assertEquals("", testName.getFamily());
-		assertEquals("", testName.getGiven());
+		assertEquals(null, testName.getFamily());
+		assertEquals(null, testName.getGiven());
 		
 		// basic tests
 		testName.setFamily("family");
@@ -103,9 +103,9 @@ public class PersonEntityTest extends EntityTest {
 		// ---------------- Address ---------------- 
 		Address testAdress = new Address();
 		// default constructor
-		assertEquals("", testAdress.getStreet());
-		assertEquals("", testAdress.getPostCode());
-		assertEquals("", testAdress.getCity());
+		assertEquals(null, testAdress.getStreet());
+		assertEquals(null, testAdress.getPostCode());
+		assertEquals(null, testAdress.getCity());
 		
 		//basic tests
 		testAdress.setStreet("street");
@@ -146,8 +146,8 @@ public class PersonEntityTest extends EntityTest {
 		// ---------------- Contact ---------------- 
 		Contact testContact = new Contact();
 		// default constructor
-		assertEquals("", testContact.getEmail());
-		assertEquals("", testContact.getPhone());
+		assertEquals(null, testContact.getEmail());
+		assertEquals(null, testContact.getPhone());
 		
 		// basic tests
 		testContact.setEmail("this@mail.com");
@@ -159,27 +159,27 @@ public class PersonEntityTest extends EntityTest {
 		testContact.setEmail("a@b");
 		testContact.setPhone("");
 		Set<ConstraintViolation<Contact>> constraintValidationsContact = validator.validate(testContact);
-		assertEquals(0, constraintValidationsAddress.size());
+		assertEquals(0, constraintValidationsContact.size());
 		
 		
 		// in bounds
 		testContact.setEmail("broker@models.com");
 		testContact.setPhone("00111201230");
 		constraintValidationsContact = validator.validate(testContact);
-		assertEquals(0, constraintValidationsAddress.size());
+		assertEquals(0, constraintValidationsContact.size());
 		
 		
 		// high bounds
 		testContact.setEmail("012345678901234567890123456789@01234567890123456789012345678901");
 		testContact.setPhone("0123456789012345678901234567890");
 		constraintValidationsContact = validator.validate(testContact);
-		assertEquals(0, constraintValidationsAddress.size());
+		assertEquals(0, constraintValidationsContact.size());
 		
 		// out of bounds
 		testContact.setEmail("012345678901234567890123456789@012345678901234567890123456789012");
 		testContact.setPhone("01234567890123456789012345678901");
 		constraintValidationsContact = validator.validate(testContact);
-		assertEquals(0, constraintValidationsAddress.size());
+		assertEquals(2, constraintValidationsContact.size());
 		
 	}
 	
