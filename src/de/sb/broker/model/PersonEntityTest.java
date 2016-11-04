@@ -185,7 +185,17 @@ public class PersonEntityTest extends EntityTest {
 	
 	@Test
 	public void testLifeCycle() {
-		// TODO
+		/*
+		 * TODO
+		 * erstellen
+		 * befüllen
+		 * persist (insert)
+		 * vergleichen
+		 * ändern (ein feld)
+		 * persist (commit/flush)
+		 * relations mengen ändern
+		 * validierung erfolgt automatisch von JPA
+		 */
 	}
 
 }

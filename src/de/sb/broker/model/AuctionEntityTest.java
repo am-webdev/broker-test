@@ -31,22 +31,21 @@ public class AuctionEntityTest extends EntityTest {
 		assertEquals(1337, auction1.getAskingPrice());
 		assertNotEquals(null, auction1.getSeller());
 		assertEquals(1, auction1.getVersion());
-		
+		// TODO constraintViolations
 		
 		// Legal Test Cases
-		Validator validator = getEntityValidatorFactory().getValidator();
+		final Validator validator = getEntityValidatorFactory().getValidator();
 		auction1.setAskingPrice(1);
-	    Set<ConstraintViolation<Auction>> constraintViolations = validator.validate( auction1 );
-	    assertEquals( 0, constraintViolations.size() );	
+	    assertEquals(0 , validator.validate(auction1).size());	
 
 		auction1.setAskingPrice(Long.MAX_VALUE);
 		validator.validate( auction1 );
-	    assertEquals( 0, constraintViolations.size() );
+		assertEquals(0 , validator.validate(auction1).size());	// TODO kopieren für alle anderen asserts
+
 
 	    auction1.setDescription("x");
 	    validator.validate( auction1 );
-	    assertEquals( 0, constraintViolations.size() );
-	    //TODO
+	    assertEquals( 0, validator.validate(auction1).size());
 		
 		// Negative Test Cases
 
