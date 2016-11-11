@@ -2,12 +2,9 @@ package de.sb.broker.model;
 
 import static org.junit.Assert.*;
 
-import java.util.Set;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
 import org.junit.After;
@@ -188,6 +185,7 @@ public class PersonEntityTest extends EntityTest {
 		
 		Person person = new Person();
 		person.setAlias("person");
+		
 		person.setAvatar(new Document("name", "mytype", new byte[32], new byte[32]));
 		person.setPasswordHash(Person.passwordHash("password"));
 		person.setContact(new Contact("abc@test.de", "1234"));

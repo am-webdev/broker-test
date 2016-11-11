@@ -2,15 +2,9 @@ package de.sb.broker.model;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-import java.util.Set;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
-import javax.persistence.TypedQuery;
-import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
 import org.junit.Test;
