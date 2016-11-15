@@ -66,17 +66,33 @@ public class AuctionEntityTest extends EntityTest {
 		// @param: persistence-unit-names
 		EntityManager entityManager = emf.createEntityManager();
 
+		long auctionIdentity;
+		
 		// Create Object ========================
+		Person auctionPerson = new Person();
+		auctionPerson.setAlias("auctionPerson");
+		
+		auctionPerson.setAvatar(new Document("auctionPersonDoc", "mytype", new byte[32], new byte[32]));
+		auctionPerson.setPasswordHash(Person.passwordHash("password"));
+		auctionPerson.setContact(new Contact("abc@test.de", "1234"));
+		auctionPerson.setAddress(new Address("street", "12346", "Here"));
+		auctionPerson.setName(new Name("foo", "bar"));
 
-		Auction auction = new Auction();
+		Auction auction = new Auction(auctionPerson);
+		auction.setAskingPrice(42);
+		auction.setDescription("this is an auction description");
+		auction.setTitle("this is an auction title");
+		auction.setUnitCount((short) 12);
+		
 
 		// start
 		try {
 			entityManager.getTransaction().begin();
 			entityManager.persist(auction);
 			entityManager.getTransaction().commit();
-		} catch (Exception e) {
-			// Freak out
+			auctionIdentity = auction.getIdentity();
+			assertNotEquals(0, auctionIdentity);
+			this.getWasteBasket().add(auctionIdentity);
 		} finally {
 			if (entityManager.getTransaction().isActive())
 				entityManager.getTransaction().rollback();
@@ -89,16 +105,11 @@ public class AuctionEntityTest extends EntityTest {
 		entityManager = emf.createEntityManager();
 		try {
 			entityManager.getTransaction().begin();
-			Auction a1 = entityManager.find(Auction.class, 1 /* (auctionIdentity) */);
-			// Auction a1 = entityManager.getReference(Auction.class, 1 /*
-			// (auctionIdentity) */);
+			Auction a1 = entityManager.find(Auction.class, auctionIdentity);
 			a1.setTitle("New Auction");
-			// entityManager.flush();
 			entityManager.getTransaction().commit();
 			assertEquals("", a1.getTitle());
 			assertEquals("New Auction", a1.getTitle());
-		} catch (Exception e) {
-			// Freak out
 		} finally {
 			if (entityManager.getTransaction().isActive())
 				entityManager.getTransaction().rollback();
@@ -111,11 +122,9 @@ public class AuctionEntityTest extends EntityTest {
 		entityManager = emf.createEntityManager();
 		try {
 			entityManager.getTransaction().begin();
-			Auction a2 = entityManager.find(Auction.class, 1 /* (auctionIdentity) */);
+			Auction a2 = entityManager.find(Auction.class, auctionIdentity);
 			entityManager.remove(a2);
 			entityManager.getTransaction().commit();
-		} catch (Exception e) {
-			// Freak out
 		} finally {
 			if (entityManager.getTransaction().isActive())
 				entityManager.getTransaction().rollback();
@@ -124,22 +133,25 @@ public class AuctionEntityTest extends EntityTest {
 		}
 		// Merge Entities - basic example
 
-		Bid auction3Bid = new Bid();
-		Person auction3Person = new Person();
+		Person bidPerson =  new Person();
+		bidPerson.setAlias("bidPerson");
+		
+		bidPerson.setAvatar(new Document("bidPersonDoc", "mytype", new byte[32], new byte[32]));
+		bidPerson.setPasswordHash(Person.passwordHash("password"));
+		bidPerson.setContact(new Contact("abc@test.de", "1234"));
+		bidPerson.setAddress(new Address("street", "12346", "Here"));
+		bidPerson.setName(new Name("foobidPerson", "barbidPerson"));
 		entityManager = emf.createEntityManager();
 		try {
 			entityManager.getTransaction().begin();
-			Auction a3 = entityManager.find(Auction.class, 1 /* (auctionIdentity) */);
+			Auction a3 = entityManager.find(Auction.class, auctionIdentity);			
+			Bid bid = new Bid(a3, bidPerson);
+			bid.setPrice(12345);
 			assertEquals(a3.getBids().size(), 0);
-			assertNotEquals(auction3Person, a3.getSeller());
-			a3.getBids().add(auction3Bid);
-			a3.setSeller(auction3Person);
-			entityManager.refresh(a3);
+			a3.getBids().add(bid);
+			entityManager.refresh(entityManager.merge(a3));
 			entityManager.getTransaction().commit();
 			assertEquals(a3.getBids().size(), 1);
-			assertEquals(auction3Person, a3.getSeller());
-		} catch (Exception e) {
-			// Freak out
 		} finally {
 			if (entityManager.getTransaction().isActive())
 				entityManager.getTransaction().rollback();
