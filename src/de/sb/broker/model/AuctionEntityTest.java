@@ -66,7 +66,7 @@ public class AuctionEntityTest extends EntityTest {
 		// @param: persistence-unit-names
 		EntityManager entityManager = emf.createEntityManager();
 
-		long auctionIdentity;
+		long auctionIdentity = 0;
 		
 		// Create Object ========================
 		Person auctionPerson = new Person();
@@ -88,14 +88,16 @@ public class AuctionEntityTest extends EntityTest {
 		// start
 		try {
 			entityManager.getTransaction().begin();
+			entityManager.persist(auctionPerson);
 			entityManager.persist(auction);
 			entityManager.getTransaction().commit();
 			auctionIdentity = auction.getIdentity();
 			assertNotEquals(0, auctionIdentity);
-			this.getWasteBasket().add(auctionIdentity);
 		} finally {
 			if (entityManager.getTransaction().isActive())
 				entityManager.getTransaction().rollback();
+			this.getWasteBasket().add(auctionIdentity);
+			this.getWasteBasket().add(auctionPerson.getIdentity());
 			entityManager.clear();
 			entityManager.close();
 		}
@@ -106,13 +108,54 @@ public class AuctionEntityTest extends EntityTest {
 		try {
 			entityManager.getTransaction().begin();
 			Auction a1 = entityManager.find(Auction.class, auctionIdentity);
-			a1.setTitle("New Auction");
+			assertEquals("this is an auction title", a1.getTitle());
+			a1.setTitle("New Auction Title");
 			entityManager.getTransaction().commit();
-			assertEquals("", a1.getTitle());
-			assertEquals("New Auction", a1.getTitle());
+			entityManager.clear();
+			entityManager.getTransaction().begin();
+			a1 = entityManager.find(Auction.class, auctionIdentity);
+			assertEquals("New Auction Title", a1.getTitle());
 		} finally {
 			if (entityManager.getTransaction().isActive())
 				entityManager.getTransaction().rollback();
+			entityManager.clear();
+			entityManager.close();
+		}
+		// Merge Entities - basic example
+
+		Person bidPerson =  new Person();
+		Bid bid = null;
+		bidPerson.setAlias("bidPerson");
+		
+		bidPerson.setAvatar(new Document("bidPersonDoc", "mytype", new byte[32], new byte[32]));
+		bidPerson.setPasswordHash(Person.passwordHash("password"));
+		bidPerson.setContact(new Contact("abcd@test.de", "1234"));
+		bidPerson.setAddress(new Address("street", "12346", "Here"));
+		bidPerson.setName(new Name("foobidPerson", "barbidPerson"));
+		entityManager = emf.createEntityManager();
+		try {
+			entityManager.getTransaction().begin();
+			Auction a3 = entityManager.find(Auction.class, auctionIdentity);
+			bid = new Bid(a3, bidPerson);
+			bid.setPrice(12345);
+			assertEquals(a3.getBids().size(), 0);
+			a3.getBids().add(bid);
+			assertNotEquals(a3.getBids().size(), 0);
+			
+			entityManager.persist(bidPerson);
+			entityManager.persist(bid);
+			entityManager.refresh(entityManager.merge(a3));
+			entityManager.getTransaction().commit();
+			entityManager.clear();
+			entityManager.getTransaction().begin();
+
+			Auction a4 = entityManager.find(Auction.class, auctionIdentity);
+			assertNotEquals(a3.getBids().size(), 0);
+		} finally {
+			if (entityManager.getTransaction().isActive())
+				entityManager.getTransaction().rollback();
+			this.getWasteBasket().add(bid.getIdentity());
+			this.getWasteBasket().add(bidPerson.getIdentity());
 			entityManager.clear();
 			entityManager.close();
 		}
@@ -125,33 +168,11 @@ public class AuctionEntityTest extends EntityTest {
 			Auction a2 = entityManager.find(Auction.class, auctionIdentity);
 			entityManager.remove(a2);
 			entityManager.getTransaction().commit();
-		} finally {
-			if (entityManager.getTransaction().isActive())
-				entityManager.getTransaction().rollback();
 			entityManager.clear();
-			entityManager.close();
-		}
-		// Merge Entities - basic example
-
-		Person bidPerson =  new Person();
-		bidPerson.setAlias("bidPerson");
-		
-		bidPerson.setAvatar(new Document("bidPersonDoc", "mytype", new byte[32], new byte[32]));
-		bidPerson.setPasswordHash(Person.passwordHash("password"));
-		bidPerson.setContact(new Contact("abc@test.de", "1234"));
-		bidPerson.setAddress(new Address("street", "12346", "Here"));
-		bidPerson.setName(new Name("foobidPerson", "barbidPerson"));
-		entityManager = emf.createEntityManager();
-		try {
 			entityManager.getTransaction().begin();
-			Auction a3 = entityManager.find(Auction.class, auctionIdentity);			
-			Bid bid = new Bid(a3, bidPerson);
-			bid.setPrice(12345);
-			assertEquals(a3.getBids().size(), 0);
-			a3.getBids().add(bid);
-			entityManager.refresh(entityManager.merge(a3));
-			entityManager.getTransaction().commit();
-			assertEquals(a3.getBids().size(), 1);
+
+			a2 = entityManager.find(Auction.class, auctionIdentity);
+			assertNull(a2);
 		} finally {
 			if (entityManager.getTransaction().isActive())
 				entityManager.getTransaction().rollback();
