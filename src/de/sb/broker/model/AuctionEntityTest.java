@@ -146,8 +146,6 @@ public class AuctionEntityTest extends EntityTest {
 
 		try {
 
-			Auction a3 = entityManager.find(auction.getClass(), auction.getIdentity());
-
 			entityManager.getTransaction().begin();
 			entityManager.persist(bidPerson);
 			entityManager.getTransaction().commit();
@@ -159,12 +157,12 @@ public class AuctionEntityTest extends EntityTest {
 
 			entityManager.getTransaction().begin();
 			auction.getBids().add(bid);
-			entityManager.refresh(entityManager.merge(auction));
+			entityManager.merge(auction);
 			entityManager.getTransaction().commit();
 
 			Auction instance = entityManager.find(auction.getClass(), auction.getIdentity());
 
-			assertEquals("merge Entities", instance.getBids().size(), a3.getBids().size());
+			assertEquals("merge Entities", 1, instance.getBids().size());
 
 		} finally {
 			if (entityManager.getTransaction().isActive()) {
