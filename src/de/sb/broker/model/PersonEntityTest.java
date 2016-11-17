@@ -19,16 +19,6 @@ public class PersonEntityTest extends EntityTest {
 
 	private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("broker");
 	
-	@Before
-	public void setUp() {
-		emptyWasteBasket();
-	}
-	
-	@After
-	public void tearDown() {
-		emptyWasteBasket();
-	}
-	
 	@Test
 	public void testConstraints() {
 		// test default constructor values
