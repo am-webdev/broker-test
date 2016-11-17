@@ -2,12 +2,9 @@ package de.sb.broker.model;
 
 import static org.junit.Assert.*;
 
-import java.util.Set;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
 import org.junit.After;
@@ -173,11 +170,12 @@ public class PersonEntityTest extends EntityTest {
 	public void testLifeCycle() {
 		// @param: persistence-unit-name
 
-		// Create Object ========================
+		// Create Object =========================
 		final long personIdentity;
 		
 		Person person = new Person();
 		person.setAlias("person");
+		
 		person.setAvatar(new Document("name", "mytype", new byte[32], new byte[32]));
 		person.setPasswordHash(Person.passwordHash("password"));
 		person.setContact(new Contact("abc@test.de", "1234"));
@@ -191,33 +189,26 @@ public class PersonEntityTest extends EntityTest {
 			entityManager.getTransaction().begin();
 			entityManager.persist(person);
 			entityManager.getTransaction().commit();
-			assertNotEquals(0, person.getIdentity());
-			this.getWasteBasket().add(person.getIdentity());
-		} catch (Exception e) {
-			assertEquals(null, e);
+			personIdentity = person.getIdentity();
+			assertNotEquals(0, personIdentity);
+			this.getWasteBasket().add(personIdentity);
 		} finally {
 			if(entityManager.getTransaction().isActive()) entityManager.getTransaction().rollback();
 			entityManager.clear();
 			entityManager.close();
 		}	
 
-		// Update Entity ========================
+		// Update Entity =========================
 		entityManager = emf.createEntityManager();
 		try {				
 			entityManager.getTransaction().begin();
-			entityManager.refresh(entityManager.merge(person));
-			personIdentity = person.getIdentity();
-			this.getWasteBasket().add(personIdentity);
-			Person p1 = entityManager.find(Person.class, personIdentity /* (personIdentity) */);
-			// Person p1 = entityManager.getReference(Person.class, 1 /*(personIdentity)*/);
-			p1.setAlias("New Alias");
-			// entityManager.flush();
-			
+			Person p1 = entityManager.find(Person.class, personIdentity);
+			p1.setAlias("New Alias");			
 			entityManager.getTransaction().commit();
 			entityManager.clear();
 			entityManager.getTransaction().begin();
 			
-			p1 = entityManager.find(Person.class, personIdentity /* (personIdentity) */);
+			p1 = entityManager.find(Person.class, personIdentity);
 			assertEquals("New Alias", p1.getAlias());
 		} finally {
 			if(entityManager.getTransaction().isActive()) entityManager.getTransaction().rollback();
@@ -225,7 +216,7 @@ public class PersonEntityTest extends EntityTest {
 			entityManager.close();
 		}	
 
-		// Delete Entity ========================
+		// Delete Entity =========================
 		entityManager = emf.createEntityManager();
 		try {	
 			entityManager.getTransaction().begin();
