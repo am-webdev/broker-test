@@ -16,16 +16,6 @@ public class PersonEntityTest extends EntityTest {
 
 	private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("broker");
 	
-	@Before
-	public void setUp() {
-		emptyWasteBasket();
-	}
-	
-	@After
-	public void tearDown() {
-		emptyWasteBasket();
-	}
-	
 	@Test
 	public void testConstraints() {
 		// test default constructor values
@@ -180,7 +170,7 @@ public class PersonEntityTest extends EntityTest {
 	public void testLifeCycle() {
 		// @param: persistence-unit-name
 
-		// Create Object ========================
+		// Create Object =========================
 		final long personIdentity;
 		
 		Person person = new Person();
@@ -208,7 +198,7 @@ public class PersonEntityTest extends EntityTest {
 			entityManager.close();
 		}	
 
-		// Update Entity ========================
+		// Update Entity =========================
 		entityManager = emf.createEntityManager();
 		try {				
 			entityManager.getTransaction().begin();
@@ -226,7 +216,7 @@ public class PersonEntityTest extends EntityTest {
 			entityManager.close();
 		}	
 
-		// Delete Entity ========================
+		// Delete Entity =========================
 		entityManager = emf.createEntityManager();
 		try {	
 			entityManager.getTransaction().begin();
