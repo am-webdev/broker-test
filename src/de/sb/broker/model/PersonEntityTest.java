@@ -194,7 +194,7 @@ public class PersonEntityTest extends EntityTest {
 			this.getWasteBasket().add(personIdentity);
 		} finally {
 			if(entityManager.getTransaction().isActive()) entityManager.getTransaction().rollback();
-			entityManager.clear();
+			//TODO clear before close is unneccessary
 			entityManager.close();
 		}	
 
@@ -212,7 +212,6 @@ public class PersonEntityTest extends EntityTest {
 			assertEquals("New Alias", p1.getAlias());
 		} finally {
 			if(entityManager.getTransaction().isActive()) entityManager.getTransaction().rollback();
-			entityManager.clear();
 			entityManager.close();
 		}	
 
