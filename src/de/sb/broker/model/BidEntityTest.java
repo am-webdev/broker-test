@@ -61,7 +61,7 @@ public class BidEntityTest extends EntityTest {
 		// Create Object ========================
 		Person bidAuctionPerson = new Person();
 		bidAuctionPerson.setAlias("bidAuctionPerson");	
-		bidAuctionPerson.setAvatar(new Document("bidAuctionPersonDoc", "mytype", new byte[32], new byte[32]));
+		bidAuctionPerson.setAvatar(new Document("mytype", new byte[32], new byte[32]));
 		bidAuctionPerson.setPasswordHash(Person.passwordHash("password"));
 		bidAuctionPerson.setContact(new Contact("test1@test.de", "1234"));
 		bidAuctionPerson.setAddress(new Address("street", "12346", "Here"));
@@ -75,7 +75,7 @@ public class BidEntityTest extends EntityTest {
 		
 		Person bidPerson =  new Person();
 		bidPerson.setAlias("bidPerson");	
-		bidPerson.setAvatar(new Document("bidPersonDoc", "mytype", new byte[32], new byte[32]));
+		bidPerson.setAvatar(new Document("mytype", new byte[32], new byte[32]));
 		bidPerson.setPasswordHash(Person.passwordHash("password"));
 		bidPerson.setContact(new Contact("test2@test.de", "1234"));
 		bidPerson.setAddress(new Address("street", "12346", "Here"));

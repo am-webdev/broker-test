@@ -71,7 +71,7 @@ public class AuctionEntityTest extends EntityTest {
 		Person auctionPerson = new Person();
 		auctionPerson.setAlias("auctionPerson");
 
-		auctionPerson.setAvatar(new Document("auctionPersonDoc", "mytype", new byte[32], new byte[32]));
+		auctionPerson.setAvatar(new Document("mytype", new byte[32], new byte[32]));
 		auctionPerson.setPasswordHash(Person.passwordHash("password"));
 		auctionPerson.setContact(new Contact("abc@test.de", "1234"));
 		auctionPerson.setAddress(new Address("street", "12346", "Here"));
@@ -136,7 +136,7 @@ public class AuctionEntityTest extends EntityTest {
 		Person bidPerson = new Person();
 		bidPerson.setAlias("bidPerson");
 
-		bidPerson.setAvatar(new Document("bidPersonDoc", "mytype", new byte[32], new byte[32]));
+		bidPerson.setAvatar(new Document("mytype", new byte[32], new byte[32]));
 		bidPerson.setPasswordHash(Person.passwordHash("password"));
 		bidPerson.setContact(new Contact("test@test.de", "1234"));
 		bidPerson.setAddress(new Address("street", "12346", "Here"));

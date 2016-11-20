@@ -176,7 +176,7 @@ public class PersonEntityTest extends EntityTest {
 		Person person = new Person();
 		person.setAlias("person");
 		
-		person.setAvatar(new Document("name", "mytype", new byte[32], new byte[32]));
+		person.setAvatar(new Document("mytype", new byte[32], new byte[32]));
 		person.setPasswordHash(Person.passwordHash("password"));
 		person.setContact(new Contact("abc@test.de", "1234"));
 		person.setAddress(new Address("street", "12346", "Here"));
