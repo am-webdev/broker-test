@@ -7,8 +7,18 @@ import org.junit.Test;
 public class AuctionServiceTest extends ServiceTest {
 
 	@Test
-	public void test() {
-		fail("Not yet implemented");
+	public void testCriteriaQueries() {
+		
+	}
+	
+	@Test
+	public void testIdentityQueries() {
+		
+	}
+	
+	@Test
+	public void testBidRelations() {
+		
 	}
 
 }
