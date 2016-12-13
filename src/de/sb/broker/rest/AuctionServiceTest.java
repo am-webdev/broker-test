@@ -38,7 +38,7 @@ public class AuctionServiceTest extends ServiceTest {
 	 * 
 	 * TODO Exceptions nicht vergessen
 	 * 
-	 * @author Ahmend
+	 * @author Ahmed
 	 */
 	@Test
 	public void testBidRelations() {
