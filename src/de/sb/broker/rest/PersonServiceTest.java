@@ -2,7 +2,17 @@ package de.sb.broker.rest;
 
 import static org.junit.Assert.*;
 
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
+
+import org.glassfish.jersey.client.ClientResponse;
 import org.junit.Test;
+
+import de.sb.broker.model.Address;
+import de.sb.broker.model.Contact;
+import de.sb.broker.model.Document;
+import de.sb.broker.model.Name;
+import de.sb.broker.model.Person;
 
 public class PersonServiceTest extends ServiceTest {
 
@@ -68,7 +78,21 @@ public class PersonServiceTest extends ServiceTest {
 	 */
 	@Test
 	public void testLifeCycle() {
+		WebTarget webTarget = newWebTarget("badUsername", "badPassword").path("people/");
+		assertEquals(200, webTarget.request().get().getStatus());
+
+		Person person = new Person();
+		person.setAlias("testPerson");
 		
+		person.setAvatar(new Document("mytype", new byte[32], new byte[32]));
+		person.setPasswordHash(Person.passwordHash("password"));
+		person.setContact(new Contact("abc@test.de", "1234"));
+		person.setAddress(new Address("street", "12346", "Here"));
+		person.setName(new Name("foo", "bar"));
+
+
+		webTarget = newWebTarget("badUsername", "badPassword").path("people/");
+		webTarget.request().put(null);
 	}
 
 }
