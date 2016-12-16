@@ -2,6 +2,7 @@ package de.sb.broker.rest;
 
 import static org.junit.Assert.*;
 
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
@@ -157,14 +158,16 @@ public class PersonServiceTest extends ServiceTest {
 		person.setAlias("testPerson");
 		
 		person.setAvatar(new Document("mytype", new byte[32], new byte[32]));
-		person.setPasswordHash(Person.passwordHash("password"));
 		person.setContact(new Contact("abc@test.de", "1234"));
 		person.setAddress(new Address("street", "12346", "Here"));
 		person.setName(new Name("foo", "bar"));
 
 
 		webTarget = newWebTarget("badUsername", "badPassword").path("people/");
-		webTarget.request().put(null);
+		webTarget.request().accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML);
+		webTarget.request().header("Set-password", "password");
+		Response response = webTarget.request().put(Entity.json(person));
+		assertEquals(200, response.getStatus());
 	}
 
 }
