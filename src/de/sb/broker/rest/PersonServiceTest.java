@@ -9,6 +9,7 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
@@ -18,6 +19,7 @@ import de.sb.broker.model.Address;
 
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 
 import de.sb.broker.model.Auction;
 import de.sb.broker.model.Bid;
@@ -174,16 +176,19 @@ public class PersonServiceTest extends ServiceTest {
 		Person person = new Person();
 		person.setAlias("testPerson");
 		
-		person.setAvatar(new Document("mytype", new byte[32], new byte[32]));
+		person.setAvatar(new Document("image/png", new byte[32], new byte[32]));
 		person.setContact(new Contact("abc@test.de", "1234"));
 		person.setAddress(new Address("street", "12346", "Here"));
 		person.setName(new Name("foo", "bar"));
 
 
 		webTarget = newWebTarget("badUsername", "badPassword").path("people/");
-		webTarget.request().accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML);
-		webTarget.request().header("Set-password", "password");
-		Response response = webTarget.request().put(Entity.json(person));
+		final Invocation.Builder builder = webTarget.request();
+		builder.accept(MediaType.TEXT_PLAIN);
+		builder.header("Set-password", "password");
+		final Response response = builder.put(Entity.json(person));
+		getWasteBasket().add(response.readEntity(Long.class));		
+		assertNotEquals(new Long(0), response.readEntity(Long.class));
 		assertEquals(200, response.getStatus());
 	}
 
