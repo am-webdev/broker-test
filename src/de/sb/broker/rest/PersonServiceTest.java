@@ -5,9 +5,7 @@ import static org.junit.Assert.*;
 import java.util.List;
 
 import javax.persistence.NoResultException;
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
@@ -126,9 +124,8 @@ public class PersonServiceTest extends ServiceTest {
 					.request()
 					.accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML)
 					.get();
-			System.out.println(response);
 			List<Auction> all = response.readEntity(new GenericType<List<Auction>>() {});
-			assertEquals("Rennrad wie neu", all.get(0).getTitle());
+			assertEquals("Rennrad wie neu", all.get(2).getTitle());
 		} catch(NoResultException e){
 			throw new ClientErrorException(e.getMessage(), 404);
 		}
