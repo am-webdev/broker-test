@@ -109,6 +109,8 @@ public class PersonServiceTest extends ServiceTest {
 	@Test
 	public void testIdentityQueries() {
 		
+		
+		
 	}
 	
 	/**
@@ -190,6 +192,20 @@ public class PersonServiceTest extends ServiceTest {
 		getWasteBasket().add(response.readEntity(Long.class));		
 		assertNotEquals(new Long(0), response.readEntity(Long.class));
 		assertEquals(200, response.getStatus());
+	}
+	
+
+	
+	protected static Person createValidPerson() {
+		Person rtn = new Person();
+		rtn.setAlias("Tester");
+		rtn.setAvatar(new Document("image/png", new byte[32], new byte[32]));
+		rtn.setPasswordHash(Person.passwordHash("password"));
+		rtn.setContact(new Contact("foo@bar.bf", "1234"));
+		rtn.setAddress(new Address("FoobarStreet", "12346", "Fbar"));
+		rtn.setName(new Name("Foo", "Bar"));
+		
+		return rtn;
 	}
 
 }

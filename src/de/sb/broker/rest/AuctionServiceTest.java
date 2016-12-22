@@ -44,7 +44,7 @@ public class AuctionServiceTest extends ServiceTest {
 		WebTarget wt = null;
 		
 		// Create new Auction(s) for Test-Person
-		Person testPersonTmp = createValidPerson();
+		Person testPersonTmp = PersonServiceTest.createValidPerson();
 		Person testPerson = null;
 		
 		wt = newWebTarget("sascha", "sascha").path("people/");
@@ -100,18 +100,6 @@ public class AuctionServiceTest extends ServiceTest {
 	@Test
 	public void testBidRelations() {
 		
-	}
-	
-	protected Person createValidPerson() {
-		Person rtn = new Person();
-		rtn.setAlias("Tester");
-		rtn.setAvatar(new Document("image/png", new byte[32], new byte[32]));
-		rtn.setPasswordHash(Person.passwordHash("password"));
-		rtn.setContact(new Contact("foo@bar.bf", "1234"));
-		rtn.setAddress(new Address("FoobarStreet", "12346", "Fbar"));
-		rtn.setName(new Name("Foo", "Bar"));
-		
-		return rtn;
 	}
 
 }
