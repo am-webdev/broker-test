@@ -99,17 +99,71 @@ public class PersonServiceTest extends ServiceTest {
 	
 	/**
 	 * Tests for 
-	 * TODO GET "services/people/{identity}"
+	 * GET "services/people/{identity}"
 	 * TODO GET "services/people/requester"
-	 * TODO GET "services/people/{identity}/avatar"
+	 * GET "services/people/{identity}/avatar"
 	 * 
-	 * TODO Exceptions nicht vergessen
+	 * Exceptions nicht vergessen
 	 * @author Andreas
 	 */
 	@Test
 	public void testIdentityQueries() {
 		
+		WebTarget wt = null;
+		List<Person> personList = null;
+		Response res = null;
 		
+		res = newWebTarget("root", "root")
+				.path("people").request().accept(MediaType.APPLICATION_JSON)
+				.get();
+		
+		personList = res.readEntity(new GenericType<List<Person>>() {});
+		
+		assertEquals(200, res.getStatus());
+		assertNotEquals(0, personList.size());
+		
+		res = newWebTarget("root", "root")
+				.path("people").path(""+personList.get(0).getIdentity()).request().accept(MediaType.APPLICATION_JSON)
+				.get();
+		Person currentPerson = res.readEntity(Person.class);
+		assertEquals(200, res.getStatus());
+		assertEquals(personList.get(0).getIdentity(), currentPerson.getIdentity());
+		assertEquals(personList.get(0).getAlias(), currentPerson.getAlias());
+		
+		res = newWebTarget("root", "root")
+				.path("people")
+				.path("932")
+				.path("avatar")
+				.request()
+				.get();
+		
+		byte[] currentAvatar = res.readEntity(byte[].class);
+		assertEquals(200, res.getStatus());		
+		assertNotEquals(0, currentAvatar.length);
+		
+		res = newWebTarget("root", "root")
+				.path("people")
+				.path("783")
+				.path("avatar")
+				.request()
+				.get();
+		
+		currentAvatar = res.readEntity(byte[].class);
+		assertEquals(404, res.getStatus());
+
+		res = newWebTarget("root", "root")
+				.path("people").path("99999999").request().accept(MediaType.APPLICATION_JSON)
+				.get();
+		currentPerson = res.readEntity(Person.class);
+		assertEquals(404, res.getStatus());
+		
+
+		res = newWebTarget("root", "root")
+				.path("requester").request().accept(MediaType.APPLICATION_JSON)
+				.get();
+		currentPerson = res.readEntity(Person.class);
+		//assertEquals(200, res.getStatus());
+		//assertEquals("root", currentPerson.getAlias());
 		
 	}
 	
