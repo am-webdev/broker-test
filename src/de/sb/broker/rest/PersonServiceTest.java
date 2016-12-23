@@ -211,12 +211,13 @@ public class PersonServiceTest extends ServiceTest {
 		assertEquals(404, res.getStatus());
 		
 
-		res = newWebTarget("root", "root")
+		res = newWebTarget("sascha", "sascha")
+				.path("people")
 				.path("requester").request().accept(MediaType.APPLICATION_JSON)
 				.get();
 		currentPerson = res.readEntity(Person.class);
-		//assertEquals(200, res.getStatus());
-		//assertEquals("root", currentPerson.getAlias());
+		assertEquals(200, res.getStatus());
+		assertEquals("sascha", currentPerson.getAlias());
 		
 	}
 	
