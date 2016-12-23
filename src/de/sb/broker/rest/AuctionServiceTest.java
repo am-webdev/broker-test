@@ -2,9 +2,12 @@ package de.sb.broker.rest;
 
 import static org.junit.Assert.*;
 
+import java.util.List;
+
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -28,6 +31,42 @@ public class AuctionServiceTest extends ServiceTest {
 	@Test
 	public void testCriteriaQueries() {
 		
+		Response response = null;
+		List<Person> l = null;
+		
+		// version
+		final int lowerVersion = 1, upperVersion = 100;
+		response = newWebTarget("root", "root")
+				.path("people")
+				.queryParam("lowerVersion", lowerVersion)
+				.queryParam("upperVersion", upperVersion)
+				.request()
+				.accept(MediaType.APPLICATION_JSON)
+				.get();
+		
+		l = response.readEntity(new GenericType<List<Person>>() {});
+		for(Person p : l){
+			assertTrue(lowerVersion <= p.getVersion());
+			assertTrue(upperVersion >= p.getVersion());
+		}
+		assertEquals(200, response.getStatus());
+		
+		// creationTimeStamp
+		final long lowerCreationTimeStamp = 0, upperCreationTimeStamp = 100;
+		response = newWebTarget("root", "root")
+				.path("people")
+				.queryParam("lowerCreationTimeStamp", lowerCreationTimeStamp)
+				.queryParam("upperCreationTimeStamp", upperCreationTimeStamp)
+				.request()
+				.accept(MediaType.APPLICATION_JSON)
+				.get();
+		
+		l = response.readEntity(new GenericType<List<Person>>() {});
+		for(Person p : l){
+			assertTrue(lowerCreationTimeStamp <= p.getCreationTimeStamp());
+			assertTrue(upperCreationTimeStamp >= p.getCreationTimeStamp());
+		}
+		assertEquals(200, response.getStatus());
 	}
 	
 	/**
