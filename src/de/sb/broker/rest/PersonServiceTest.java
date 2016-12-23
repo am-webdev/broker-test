@@ -176,7 +176,7 @@ public class PersonServiceTest extends ServiceTest {
 	@Test
 	public void testAuctionRelationQueries() throws Exception {
 		try {	
-			WebTarget webTarget = newWebTarget("root", "root")
+			WebTarget webTarget = newWebTarget("sascha", "sascha")
 					.path("people/2/auctions");
 			Response response = webTarget
 					.request()
@@ -198,15 +198,16 @@ public class PersonServiceTest extends ServiceTest {
 	 * @author Martin
 	 */
 	@Test
-	public void testBidRelationQueries() {
+	public void testBidRelationQueries() throws Exception {
 		try {	
-			Response response = newWebTarget("root", "root")
-					.path("people/2/bids")
+			WebTarget webTarget = newWebTarget("sascha", "sascha")
+					.path("people/2/bids");
+			Response response = webTarget
 					.request()
 					.accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML)
 					.get();
 			List<Bid> all = response.readEntity(new GenericType<List<Bid>>() {});
-			assertEquals(1, all.get(0).getPrice());
+			assertEquals(15000, all.get(0).getPrice());
 		} catch(NoResultException e){
 			throw new ClientErrorException(e.getMessage(), 404);
 		}
@@ -227,10 +228,10 @@ public class PersonServiceTest extends ServiceTest {
 		assertEquals(200, webTarget.request().get().getStatus());
 
 		Person person = new Person();
-		person.setAlias("testPerson");
+		person.setAlias("testPerson3");
 		
 		person.setAvatar(new Document("image/png", new byte[32], new byte[32]));
-		person.setContact(new Contact("abc@test.de", "1234"));
+		person.setContact(new Contact("test@test.de", "1234"));
 		person.setAddress(new Address("street", "12346", "Here"));
 		person.setName(new Name("foo", "bar"));
 
@@ -239,8 +240,7 @@ public class PersonServiceTest extends ServiceTest {
 		final Invocation.Builder builder = webTarget.request();
 		builder.accept(MediaType.TEXT_PLAIN);
 		builder.header("Set-password", "password");
-		final Response response = builder.put(Entity.json(person));
-		getWasteBasket().add(response.readEntity(Long.class));		
+		final Response response = builder.put(Entity.json(person));		
 		assertNotEquals(new Long(0), response.readEntity(Long.class));
 		assertEquals(200, response.getStatus());
 	}
