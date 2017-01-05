@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
@@ -133,6 +134,8 @@ public class AuctionServiceTest extends ServiceTest {
 	public void testIdentityQueries() {
 		WebTarget wt = null;
 		
+		long tmpId = 0l;
+		
 		// Create new Auction(s) for Test-Person
 		Person testPersonTmp = PersonServiceTest.createValidPerson();
 		Person testPerson = null;
@@ -142,12 +145,13 @@ public class AuctionServiceTest extends ServiceTest {
 		builder.accept(MediaType.TEXT_PLAIN);
 		builder.header("Set-password", "sascha");
 		final Response personResponse = builder.put(Entity.json(testPersonTmp));
-		getWasteBasket().add(personResponse.readEntity(Long.class));		
-		assertNotEquals(new Long(0), personResponse.readEntity(Long.class));
+		tmpId = personResponse.readEntity(Long.class);
+		getWasteBasket().add(tmpId);		
+		assertNotEquals(new Long(0), new Long(tmpId));
 		assertEquals(200, personResponse.getStatus());
 		
 
-		wt = newWebTarget("sascha", "sascha").path("people/"+personResponse.readEntity(Long.class));
+		wt = newWebTarget("sascha", "sascha").path("people/"+tmpId);
 		final Invocation.Builder actualPersonBuilder = wt.request();
 		actualPersonBuilder.accept(MediaType.APPLICATION_JSON);
 		final Response actualPersonResponse = actualPersonBuilder.get();
@@ -156,6 +160,7 @@ public class AuctionServiceTest extends ServiceTest {
 		
 
 		Auction testAuction = new Auction(testPerson);
+		testAuction.setSeller(testPerson);
 		testAuction.setAskingPrice(42);
 		testAuction.setDescription("Foobar setDescription");
 		testAuction.setTitle("Foobar Auction");
@@ -167,13 +172,28 @@ public class AuctionServiceTest extends ServiceTest {
 		auctionbuilder.accept(MediaType.TEXT_PLAIN);
 		auctionbuilder.header("Set-password", "sascha");
 		final Response auctionResponse = auctionbuilder.put(Entity.json(testAuction));
-		getWasteBasket().add(auctionResponse.readEntity(Long.class));		
-		assertNotEquals(new Long(0), auctionResponse.readEntity(Long.class));
+		tmpId = auctionResponse.readEntity(Long.class);
+		getWasteBasket().add(tmpId);		
+		assertNotEquals(new Long(0), new Long(tmpId));
 		assertEquals(200, auctionResponse.getStatus());
 		
+		wt = newWebTarget("sascha", "sascha").path("auctions/"+tmpId);
+		final Response actualAuctionResponse = wt.request().get();
+		Auction actualAuction = actualAuctionResponse.readEntity(Auction.class);
+		assertEquals("Foobar Auction", actualAuction.getTitle());
 		
 		
-		// TODO Set some bids for the Test Auctions
+		// Set some bids for the Test auctions
+
+		/*
+		 *  TODO needs to be fixed
+		 *  	if sascha or 400
+		 *  	if other user: 401
+		 */
+		wt = newWebTarget("sascha", "sascha").path("auctions/"+tmpId+"/bid");
+		final Response response = wt.request(MediaType.TEXT_PLAIN).header("Set-password", "sascha").post(Entity.text("1337"));
+		assertEquals(200, response.getStatus());
+		
 		
 		// TODO Assert on GET methods
 	}
@@ -193,9 +213,11 @@ public class AuctionServiceTest extends ServiceTest {
 	}
 	
 	protected static Person createValidPerson() {
+		byte[] a = new byte[32];
+		new Random().nextBytes(a);
 		Person rtn = new Person();
 		rtn.setAlias("Tester");
-		rtn.setAvatar(new Document("image/png", new byte[32], new byte[32]));
+		rtn.setAvatar(new Document("image/png", a, new byte[32]));
 		rtn.setPasswordHash(Person.passwordHash("password"));
 		rtn.setContact(new Contact("foo@bar.bf", "1234"));
 		rtn.setAddress(new Address("FoobarStreet", "12346", "Fbar"));

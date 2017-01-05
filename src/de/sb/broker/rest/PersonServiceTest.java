@@ -8,6 +8,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import javax.persistence.NoResultException;
 import javax.ws.rs.ClientErrorException;
@@ -191,7 +192,7 @@ public class PersonServiceTest extends ServiceTest {
 	/**
 	 * Tests for 
 	 * GET "services/people/{identity}"
-	 * TODO GET "services/people/requester"
+	 * GET "services/people/requester"
 	 * GET "services/people/{identity}/avatar"
 	 * 
 	 * Exceptions nicht vergessen
@@ -223,14 +224,14 @@ public class PersonServiceTest extends ServiceTest {
 		
 		res = newWebTarget("root", "root")
 				.path("people")
-				.path("932")
+				.path("99999")
 				.path("avatar")
 				.request()
 				.get();
 		
-		byte[] currentAvatar = res.readEntity(byte[].class);
-		assertEquals(200, res.getStatus());		
-		assertNotEquals(0, currentAvatar.length);
+		//byte[] currentAvatar = res.readEntity(byte[].class);
+		assertEquals(404, res.getStatus());		
+		//assertNotEquals(0, currentAvatar.length);
 		
 		res = newWebTarget("root", "root")
 				.path("people")
@@ -238,8 +239,8 @@ public class PersonServiceTest extends ServiceTest {
 				.path("avatar")
 				.request()
 				.get();
-		
-		currentAvatar = res.readEntity(byte[].class);
+
+		byte[] currentAvatar = res.readEntity(byte[].class);
 		assertEquals(404, res.getStatus());
 
 		res = newWebTarget("root", "root")
@@ -247,15 +248,24 @@ public class PersonServiceTest extends ServiceTest {
 				.get();
 		currentPerson = res.readEntity(Person.class);
 		assertEquals(404, res.getStatus());
-		
 
-		res = newWebTarget("root", "root")
+		res = newWebTarget("sascha", "sascha")
+				.path("people")
 				.path("requester").request().accept(MediaType.APPLICATION_JSON)
 				.get();
-		currentPerson = res.readEntity(Person.class);
-		//assertEquals(200, res.getStatus());
-		//assertEquals("root", currentPerson.getAlias());
 		
+		currentPerson = res.readEntity(Person.class);
+		assertEquals(200, res.getStatus());
+		assertEquals("sascha", currentPerson.getAlias());
+		
+
+		res = newWebTarget("baduser", "badpw")
+				.path("people")
+				.path("requester").request().accept(MediaType.APPLICATION_JSON)
+				.get();
+		
+		currentPerson = res.readEntity(Person.class);
+		assertEquals(401, res.getStatus());		
 	}
 	
 	/**
@@ -362,9 +372,11 @@ public class PersonServiceTest extends ServiceTest {
 	}
 	
 	protected static Person createValidPerson() {
+		byte[] a = new byte[32];
+		new Random().nextBytes(a);
 		Person rtn = new Person();
 		rtn.setAlias("Tester");
-		rtn.setAvatar(new Document("image/png", new byte[32], new byte[32]));
+		rtn.setAvatar(new Document("image/png", a, new byte[32]));
 		rtn.setPasswordHash(Person.passwordHash("password"));
 		rtn.setContact(new Contact("foo@bar.bf", "1234"));
 		rtn.setAddress(new Address("FoobarStreet", "12346", "Fbar"));
