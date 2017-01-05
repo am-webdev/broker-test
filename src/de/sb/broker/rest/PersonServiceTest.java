@@ -16,6 +16,7 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.junit.Test;
 
 import de.sb.broker.model.Address;
@@ -302,7 +303,11 @@ public class PersonServiceTest extends ServiceTest {
 		
 		final Invocation.Builder builder = webTarget.request();
 		builder.accept(MediaType.TEXT_PLAIN);
-		builder.header("Set-password", "password");
+		builder.header("Set-password", "password")
+		.property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_USERNAME, "sascha")
+	    .property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_PASSWORD, "sascha");
+		
+		
 		final Response response = builder.put(Entity.json(p));
 		
 		assertEquals(200, response.getStatus());
