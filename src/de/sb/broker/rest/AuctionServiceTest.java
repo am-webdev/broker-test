@@ -177,9 +177,23 @@ public class AuctionServiceTest extends ServiceTest {
 		assertNotEquals(new Long(0), new Long(tmpId));
 		assertEquals(200, auctionResponse.getStatus());
 		
+		wt = newWebTarget("sascha", "sascha").path("auctions/"+tmpId);
+		final Response actualAuctionResponse = wt.request().get();
+		Auction actualAuction = actualAuctionResponse.readEntity(Auction.class);
+		assertEquals("Foobar Auction", actualAuction.getTitle());
 		
 		
-		// TODO Set some bids for the Test Auctions
+		// Set some bids for the Test auctions
+
+		/*
+		 *  TODO needs to be fixed
+		 *  	if sascha or 400
+		 *  	if other user: 401
+		 */
+		wt = newWebTarget("sascha", "sascha").path("auctions/"+tmpId+"/bid");
+		final Response response = wt.request(MediaType.TEXT_PLAIN).header("Set-password", "sascha").post(Entity.text("1337"));
+		assertEquals(200, response.getStatus());
+		
 		
 		// TODO Assert on GET methods
 	}
