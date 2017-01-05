@@ -2,6 +2,9 @@ package de.sb.broker.rest;
 
 import static org.junit.Assert.*;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.client.Entity;
@@ -31,8 +34,56 @@ public class AuctionServiceTest extends ServiceTest {
 	@Test
 	public void testCriteriaQueries() {
 		
+		/**
+		 * 
+		 */
+		WebTarget webTarget = newWebTarget("badUsername", "badPassword").path("people/");
+		assertEquals(200, webTarget.request().get().getStatus());
+		
 		Response response = null;
 		List<Person> l = null;
+
+		Person person = createValidPerson();
+
+		webTarget = newWebTarget("badUsername", "badPassword").path("people/");
+		final Invocation.Builder builder = webTarget.request();
+		builder.header("Set-password", "password");
+		response = builder.put(Entity.json(person));		
+		assertNotEquals(new Long(0), response.readEntity(Long.class));
+		assertEquals(200, response.getStatus());
+		
+		Class<?> c = Person.class;
+		List<Field> fields = new ArrayList<Field>();
+
+		do{
+			fields.addAll(Arrays.asList(c.getDeclaredFields()));
+			c = c.getSuperclass();
+		}while(c != null);
+		
+		for(Field f: fields){
+			
+			String uppercaseName = f.getName().substring(0, 1).toUpperCase() + f.getName().substring(1);
+			
+			if(f.getType() == Integer.TYPE){
+				
+				// version
+				final int lower = 1, upper = 100;
+				response = newWebTarget("root", "root")
+						.path("people")
+						.queryParam("lower" + uppercaseName, lower)
+						.queryParam("upper" + uppercaseName, upper)
+						.request()
+						.accept(MediaType.APPLICATION_JSON)
+						.get();
+				
+				l = response.readEntity(new GenericType<List<Person>>() {});
+				for(Person p : l){
+//					assertTrue(lower <= p.getClass().getField(f.getName()).getInt(null));
+					assertTrue(upper >= p.getVersion());
+				}
+				
+			}
+		}
 		
 		// version
 		final int lowerVersion = 1, upperVersion = 100;
@@ -139,6 +190,18 @@ public class AuctionServiceTest extends ServiceTest {
 	@Test
 	public void testBidRelations() {
 		
+	}
+	
+	protected static Person createValidPerson() {
+		Person rtn = new Person();
+		rtn.setAlias("Tester");
+		rtn.setAvatar(new Document("image/png", new byte[32], new byte[32]));
+		rtn.setPasswordHash(Person.passwordHash("password"));
+		rtn.setContact(new Contact("foo@bar.bf", "1234"));
+		rtn.setAddress(new Address("FoobarStreet", "12346", "Fbar"));
+		rtn.setName(new Name("Foo", "Bar"));
+		
+		return rtn;
 	}
 
 }
