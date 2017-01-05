@@ -32,6 +32,7 @@ import de.sb.broker.model.Contact;
 import de.sb.broker.model.Document;
 import de.sb.broker.model.Name;
 import de.sb.broker.model.Person;
+import de.sb.broker.model.Person.Group;
 
 
 public class PersonServiceTest extends ServiceTest {
@@ -46,59 +47,63 @@ public class PersonServiceTest extends ServiceTest {
 	 */
 	@Test
 	public void testCriteriaQueries() throws ClassNotFoundException {
+		
 		/**
-		 * Check if test person already exists
+		 * Insert Test Persons
 		 */
 		
+		Person p = new Person();
+		p.setName(new Name("Samuel", "Fux"));
+		p.setAlias("Samu");
+		p.setAddress(new Address("Berliner Straße 143", "12457", "Berlin"));
+		p.setPasswordHash(Person.passwordHash("Samu123"));
+		p.setContact(new Contact("samu.fux@gmail.com", "+491077329422"));
+		p.setAvatar(new Document("image/png", new byte[32], new byte[32]));
+		p.setVersion(10);
+		p.setGroup(Person.Group.USER);
 		
+		Person p2 = new Person();
+		p2.setName(new Name("Friedrich", "Gärtner"));
+		p2.setAlias("Friedi");
+		p2.setAddress(new Address("Kurze Str. 5A", "12448", "Berlin"));
+		p2.setPasswordHash(Person.passwordHash("Kurz987"));
+		p2.setContact(new Contact("info@friedrich.gaertner.com", "+4910762433423"));
+		p2.setAvatar(new Document("image/png", new byte[32], new byte[32]));
+		p2.setVersion(120);
+		p.setGroup(Person.Group.ADMIN);
 		
-		long id = generateTestPersonEntity();
+		WebTarget webTarget = newWebTarget("root", "root").path("people/");
+		
+		final Invocation.Builder builder = webTarget.request();
+		builder.accept(MediaType.TEXT_PLAIN);
+		builder.header("Set-password", "password")
+		.property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_USERNAME, "sascha")
+	    .property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_PASSWORD, "sascha");
+		
+		Response response = builder.put(Entity.json(p));
+		long id = response.readEntity(Long.class);
 		
 		assertNotEquals(0, id);
+		assertEquals(200, response.getStatus());
 		
-		Class<?> c = Person.class;
-		List<Field> fields = new ArrayList<Field>();
-		Response response;
-		List<Person> l;
-
-		do{
-			fields.addAll(Arrays.asList(c.getDeclaredFields()));
-			c = c.getSuperclass();
-		}while(c != null);
+		this.getWasteBasket().add(id);
 		
-		for(Field f: fields){
-			
-			String uppercaseName = f.getName().substring(0, 1).toUpperCase() + f.getName().substring(1);
-			
-			if(f.getType() == Integer.TYPE){
-				
-				// version
-				final int lower = 1, upper = 100;
-				response = newWebTarget("root", "root")
-						.path("people")
-						.queryParam("lower" + uppercaseName, lower)
-						.queryParam("upper" + uppercaseName, upper)
-						.request()
-						.accept(MediaType.APPLICATION_JSON)
-						.get();
-				
-				l = response.readEntity(new GenericType<List<Person>>() {});
-				for(Person p : l){
-					
-//					assertTrue(lower <= p.getClass().getField(f.getName()).getInt(null));
-					assertTrue(upper >= p.getVersion());
-				}
-				
-			}
-		}
+		response = builder.put(Entity.json(p2));
+		id = response.readEntity(Long.class);
 		
+		assertNotEquals(0, id);
+		assertEquals(200, response.getStatus());
+		
+		this.getWasteBasket().add(id);
 		
 		/**
-		 * test criteria queries
+		 * Testing query parameters
 		 */
+
+		List<Person> l;
 		
 		// version
-		final int lowerVersion = 1, upperVersion = 100;
+		final int lowerVersion = 50, upperVersion = 150;
 		response = newWebTarget("root", "root")
 				.path("people")
 				.queryParam("lowerVersion", lowerVersion)
@@ -108,7 +113,7 @@ public class PersonServiceTest extends ServiceTest {
 				.get();
 		
 		l = response.readEntity(new GenericType<List<Person>>() {});
-		for(Person p : l){
+		for(Person t : l){
 			assertTrue(lowerVersion <= p.getVersion());
 			assertTrue(upperVersion >= p.getVersion());
 		}
@@ -125,25 +130,62 @@ public class PersonServiceTest extends ServiceTest {
 				.get();
 		
 		l = response.readEntity(new GenericType<List<Person>>() {});
-		for(Person p : l){
+		for(Person t : l){
 			assertTrue(lowerCreationTimeStamp <= p.getCreationTimeStamp());
 			assertTrue(upperCreationTimeStamp >= p.getCreationTimeStamp());
 		}
 		assertEquals(200, response.getStatus());
 		
 		// alias
-		final String alias = "T-High";
 		response = newWebTarget("root", "root")
 				.path("people")
-				.queryParam("alias", alias)
+				.queryParam("alias", p.getAlias())
 				.request()
 				.accept(MediaType.APPLICATION_JSON)
 				.get();
 		
 		l = response.readEntity(new GenericType<List<Person>>() {});
-		assertEquals("alias wrong", alias, l.get(0).getAlias());
+		assertEquals(p.getAlias(), l.get(0).getAlias());
 		assertEquals(200, response.getStatus());
 		
+		// email
+		response = newWebTarget("root", "root")
+				.path("people")
+				.queryParam("email", p.getContact().getEmail())
+				.request()
+				.accept(MediaType.APPLICATION_JSON)
+				.get();
+
+		l = response.readEntity(new GenericType<List<Person>>() {});
+		assertEquals(p.getContact().getEmail(), l.get(0).getContact().getEmail());
+		assertEquals(200, response.getStatus());
+		
+		/**
+		 * Testing exceptions
+		 */
+		
+		// nothing found
+		response = newWebTarget("root", "root")
+				.path("people")
+				.queryParam("upperVersion", 0)
+				.request()
+				.accept(MediaType.APPLICATION_JSON)
+				.get();
+
+		l = response.readEntity(new GenericType<List<Person>>() {});
+		assertEquals(0, l.size());
+		assertEquals(200, response.getStatus());
+		
+		// wrong criteria
+		response = newWebTarget("root", "root")
+				.path("people")
+				.queryParam("mois", "lalala")
+				.request()
+				.accept(MediaType.APPLICATION_JSON)
+				.get();
+
+		l = response.readEntity(new GenericType<List<Person>>() {});
+		assertEquals(200, response.getStatus());
 	}
 	
 	/**
