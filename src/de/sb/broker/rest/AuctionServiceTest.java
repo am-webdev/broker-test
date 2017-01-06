@@ -51,25 +51,9 @@ public class AuctionServiceTest extends ServiceTest {
 		p.setVersion(10);
 		p.setGroup(Person.Group.USER);
 		
-		Auction a = new Auction(p);
-		a.setSeller(p);
-		a.setAskingPrice(129);
-		a.setDescription("Neues Audio Interface bei Native Instruments");
-		a.setTitle("Kontakt 6 Audio Interface");
-		a.setUnitCount((short) 1);
-		a.setClosureTimestamp(System.currentTimeMillis()+(7*24*60*60*1000));
+		WebTarget webTarget = newWebTarget("root", "root").path("people/");
 		
-		Auction a2 = new Auction(p);
-		a2.setSeller(p);
-		a2.setAskingPrice(159);
-		a2.setDescription("Nexus VST mit multiplen Presets");
-		a2.setTitle("reFX Nexus 2.1");
-		a2.setUnitCount((short) 1);
-		a2.setClosureTimestamp(System.currentTimeMillis()+(7*24*60*60*1000));
-		
-		WebTarget webTarget = newWebTarget("root", "root").path("auctions/");
-		
-		final Invocation.Builder builder = webTarget.request();
+		Invocation.Builder builder = webTarget.request();
 		builder.accept(MediaType.TEXT_PLAIN);
 		builder.header("Set-password", "password")
 				.property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_USERNAME, "sascha")
@@ -78,10 +62,41 @@ public class AuctionServiceTest extends ServiceTest {
 		Response response = builder.put(Entity.json(p));
 		long id = response.readEntity(Long.class);
 		
+		this.getWasteBasket().add(id);
+		
 		assertNotEquals(0, id);
 		assertEquals(200, response.getStatus());
 		
-		this.getWasteBasket().add(id);
+		response = newWebTarget("root", "root")
+				.path("people/" + id)
+				.request()
+				.accept(MediaType.APPLICATION_JSON)
+				.get();
+		
+		Person p1 = response.readEntity(Person.class);
+		assertEquals(p.getAlias(), p1.getAlias());
+		
+		Auction a = new Auction(p1);
+		a.setAskingPrice(129);
+		a.setDescription("Neues Audio Interface bei Native Instruments");
+		a.setTitle("Kontakt 6 Audio Interface");
+		a.setUnitCount((short) 1);
+		a.setClosureTimestamp(System.currentTimeMillis()+(7*24*60*60*1000));
+		
+		Auction a2 = new Auction(p1);
+		a2.setAskingPrice(159);
+		a2.setDescription("Nexus VST mit multiplen Presets");
+		a2.setTitle("reFX Nexus 2.1");
+		a2.setUnitCount((short) 1);
+		a2.setClosureTimestamp(System.currentTimeMillis()+(7*24*60*60*1000));
+		
+		webTarget = newWebTarget("root", "root").path("auctions/");
+		
+		builder = webTarget.request();
+		builder.accept(MediaType.TEXT_PLAIN);
+		builder.header("Set-password", "password")
+				.property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_USERNAME, "sascha")
+			    .property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_PASSWORD, "sascha");
 		
 		response = builder.put(Entity.json(a));
 		id = response.readEntity(Long.class);
