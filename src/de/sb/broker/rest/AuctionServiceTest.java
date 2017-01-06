@@ -139,6 +139,32 @@ public class AuctionServiceTest extends ServiceTest {
 	@Test
 	public void testBidRelations() {
 		
+		//Create new bid for Test-auction
+		Auction auction = AuctionServiceTest.createValidAuction();
+		
+		WebTarget webTarget = newWebTarget("root", "root").path("auctions/");
+		final Invocation.Builder builder = webTarget.request();
+		builder.accept(MediaType.TEXT_PLAIN);
+		builder.header("Authorization", builder);
+		
+		final Response response = builder.put(Entity.json(auction));
+		
+		
+		
+		
+		
+		
+		
+	}
+	
+	protected static Auction createValidAuction() {
+		Auction act = new Auction( PersonServiceTest.createValidPerson());
+		act.setUnitCount((short) 1);
+		act.setAskingPrice(10);
+		act.setClosureTimestamp(System.currentTimeMillis() + (30*24*60*60*1000));
+		act.setDescription("Test Auction");
+		
+		return act;
 	}
 
 }
