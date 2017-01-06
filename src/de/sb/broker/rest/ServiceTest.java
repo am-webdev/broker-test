@@ -56,7 +56,7 @@ public class ServiceTest {
 			synchronized(this.wasteBasket) {
 				for (final Iterator<Long> iterator = this.wasteBasket.iterator(); iterator.hasNext(); ) {
 					try {
-						final WebTarget webTarget = newWebTarget("ines", "ines").path("entities/" + iterator.next());
+						final WebTarget webTarget = newWebTarget("sascha", "sascha").path("entities/" + iterator.next());
 						final int status = webTarget.request().delete().getStatus();
 						if (status == 204 | status == 404) iterator.remove();
 					} catch (final Exception exception) {
