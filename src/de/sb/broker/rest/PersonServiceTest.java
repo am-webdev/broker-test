@@ -47,7 +47,7 @@ public class PersonServiceTest extends ServiceTest {
 	 * @author Thilo
 	 */
 	@Test
-	public void testCriteriaQueries() throws ClassNotFoundException {
+	public void testCriteriaQueries() {
 		
 		/**
 		 * Insert Test Persons
@@ -115,8 +115,8 @@ public class PersonServiceTest extends ServiceTest {
 		
 		l = response.readEntity(new GenericType<List<Person>>() {});
 		for(Person t : l){
-			assertTrue(lowerVersion <= p.getVersion());
-			assertTrue(upperVersion >= p.getVersion());
+			assertTrue(lowerVersion <= t.getVersion());
+			assertTrue(upperVersion >= t.getVersion());
 		}
 		assertEquals(200, response.getStatus());
 		
@@ -132,8 +132,8 @@ public class PersonServiceTest extends ServiceTest {
 		
 		l = response.readEntity(new GenericType<List<Person>>() {});
 		for(Person t : l){
-			assertTrue(lowerCreationTimeStamp <= p.getCreationTimeStamp());
-			assertTrue(upperCreationTimeStamp >= p.getCreationTimeStamp());
+			assertTrue(lowerCreationTimeStamp <= t.getCreationTimeStamp());
+			assertTrue(upperCreationTimeStamp >= t.getCreationTimeStamp());
 		}
 		assertEquals(200, response.getStatus());
 		

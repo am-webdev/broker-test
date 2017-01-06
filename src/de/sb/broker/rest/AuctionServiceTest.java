@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
@@ -15,6 +16,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.junit.Test;
 
 import de.sb.broker.model.Address;
@@ -36,88 +38,159 @@ public class AuctionServiceTest extends ServiceTest {
 	public void testCriteriaQueries() {
 		
 		/**
-		 * 
+		 * Insert Test Aucions
 		 */
-		WebTarget webTarget = newWebTarget("badUsername", "badPassword").path("people/");
-		assertEquals(200, webTarget.request().get().getStatus());
+		Person p = new Person();
+		p.setName(new Name("Samuel", "Fux"));
+		p.setAlias("Samu");
+		p.setAddress(new Address("Berliner Straße 143", "12457", "Berlin"));
+		p.setPasswordHash(Person.passwordHash("Samu123"));
+		p.setContact(new Contact("samu.fux@gmail.com", "+491077329422"));
+		p.setAvatar(new Document("image/png", new byte[32], new byte[32]));
+		p.setVersion(10);
+		p.setGroup(Person.Group.USER);
 		
-		Response response = null;
-		List<Person> l = null;
-
-		Person person = createValidPerson();
-
-		webTarget = newWebTarget("badUsername", "badPassword").path("people/");
+		Auction a = new Auction(p);
+		a.setSeller(p);
+		a.setAskingPrice(129);
+		a.setDescription("Neues Audio Interface bei Native Instruments");
+		a.setTitle("Kontakt 6 Audio Interface");
+		a.setUnitCount((short) 1);
+		a.setClosureTimestamp(System.currentTimeMillis()+(7*24*60*60*1000));
+		
+		Auction a2 = new Auction(p);
+		a2.setSeller(p);
+		a2.setAskingPrice(159);
+		a2.setDescription("Nexus VST mit multiplen Presets");
+		a2.setTitle("reFX Nexus 2.1");
+		a2.setUnitCount((short) 1);
+		a2.setClosureTimestamp(System.currentTimeMillis()+(7*24*60*60*1000));
+		
+		WebTarget webTarget = newWebTarget("root", "root").path("auctions/");
+		
 		final Invocation.Builder builder = webTarget.request();
-		builder.header("Set-password", "password");
-		response = builder.put(Entity.json(person));		
-		assertNotEquals(new Long(0), response.readEntity(Long.class));
+		builder.accept(MediaType.TEXT_PLAIN);
+		builder.header("Set-password", "password")
+				.property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_USERNAME, "sascha")
+			    .property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_PASSWORD, "sascha");
+		
+		Response response = builder.put(Entity.json(p));
+		long id = response.readEntity(Long.class);
+		
+		assertNotEquals(0, id);
 		assertEquals(200, response.getStatus());
 		
-		Class<?> c = Person.class;
-		List<Field> fields = new ArrayList<Field>();
-
-		do{
-			fields.addAll(Arrays.asList(c.getDeclaredFields()));
-			c = c.getSuperclass();
-		}while(c != null);
+		this.getWasteBasket().add(id);
 		
-		for(Field f: fields){
-			
-			String uppercaseName = f.getName().substring(0, 1).toUpperCase() + f.getName().substring(1);
-			
-			if(f.getType() == Integer.TYPE){
-				
-				// version
-				final int lower = 1, upper = 100;
-				response = newWebTarget("root", "root")
-						.path("people")
-						.queryParam("lower" + uppercaseName, lower)
-						.queryParam("upper" + uppercaseName, upper)
-						.request()
-						.accept(MediaType.APPLICATION_JSON)
-						.get();
-				
-				l = response.readEntity(new GenericType<List<Person>>() {});
-				for(Person p : l){
-//					assertTrue(lower <= p.getClass().getField(f.getName()).getInt(null));
-					assertTrue(upper >= p.getVersion());
-				}
-				
-			}
-		}
+		response = builder.put(Entity.json(a));
+		id = response.readEntity(Long.class);
+		
+		assertNotEquals(0, id);
+		assertEquals(200, response.getStatus());
+		
+		this.getWasteBasket().add(id);
+		
+		response = builder.put(Entity.json(a2));
+		id = response.readEntity(Long.class);
+		
+		assertNotEquals(0, id);
+		assertEquals(200, response.getStatus());
+		
+		this.getWasteBasket().add(id);
+		
+		/**
+		 * Testing query parameters
+		 */
+
+		List<Auction> l;
 		
 		// version
-		final int lowerVersion = 1, upperVersion = 100;
+		final int lowerVersion = 50, upperVersion = 150;
 		response = newWebTarget("root", "root")
-				.path("people")
+				.path("auctions")
 				.queryParam("lowerVersion", lowerVersion)
 				.queryParam("upperVersion", upperVersion)
 				.request()
 				.accept(MediaType.APPLICATION_JSON)
 				.get();
 		
-		l = response.readEntity(new GenericType<List<Person>>() {});
-		for(Person p : l){
-			assertTrue(lowerVersion <= p.getVersion());
-			assertTrue(upperVersion >= p.getVersion());
+		l = response.readEntity(new GenericType<List<Auction>>() {});
+		for(Auction t : l){
+			assertTrue(lowerVersion <= t.getVersion());
+			assertTrue(upperVersion >= t.getVersion());
 		}
 		assertEquals(200, response.getStatus());
 		
 		// creationTimeStamp
 		final long lowerCreationTimeStamp = 0, upperCreationTimeStamp = 100;
 		response = newWebTarget("root", "root")
-				.path("people")
+				.path("auctions")
 				.queryParam("lowerCreationTimeStamp", lowerCreationTimeStamp)
 				.queryParam("upperCreationTimeStamp", upperCreationTimeStamp)
 				.request()
 				.accept(MediaType.APPLICATION_JSON)
 				.get();
 		
-		l = response.readEntity(new GenericType<List<Person>>() {});
-		for(Person p : l){
-			assertTrue(lowerCreationTimeStamp <= p.getCreationTimeStamp());
-			assertTrue(upperCreationTimeStamp >= p.getCreationTimeStamp());
+		l = response.readEntity(new GenericType<List<Auction>>() {});
+		for(Auction t : l){
+			assertTrue(lowerCreationTimeStamp <= t.getCreationTimeStamp());
+			assertTrue(upperCreationTimeStamp >= t.getCreationTimeStamp());
 		}
+		assertEquals(200, response.getStatus());
+		
+		// title
+		response = newWebTarget("root", "root")
+				.path("auctions")
+				.queryParam("title", a.getTitle())
+				.request()
+				.accept(MediaType.APPLICATION_JSON)
+				.get();
+		
+		l = response.readEntity(new GenericType<List<Auction>>() {});
+		assertEquals(a.getTitle(), l.get(0).getTitle());
+		assertEquals(200, response.getStatus());
+		
+		// price
+		response = newWebTarget("root", "root")
+				.path("auctions")
+				.queryParam("lowerAskingPrice", a.getAskingPrice() - 10)
+				.queryParam("upperAskingPrice", a.getAskingPrice() + 10)
+				.request()
+				.accept(MediaType.APPLICATION_JSON)
+				.get();
+
+		l = response.readEntity(new GenericType<List<Auction>>() {});
+		for(Auction t : l){
+			assertTrue(a.getAskingPrice() - 10 >= t.getAskingPrice());
+			assertTrue(a.getAskingPrice() + 10 <= t.getCreationTimeStamp());
+		}
+		assertEquals(200, response.getStatus());
+		
+		/**
+		 * Testing exceptions
+		 */
+		
+		// nothing found
+		response = newWebTarget("root", "root")
+				.path("auctions")
+				.queryParam("upperVersion", 0)
+				.request()
+				.accept(MediaType.APPLICATION_JSON)
+				.get();
+
+		l = response.readEntity(new GenericType<List<Auction>>() {});
+		assertEquals(0, l.size());
+		assertEquals(200, response.getStatus());
+		
+		// wrong criteria
+		response = newWebTarget("root", "root")
+				.path("auctions")
+				.queryParam("mois", "lalala")
+				.request()
+				.accept(MediaType.APPLICATION_JSON)
+				.get();
+
+		l = response.readEntity(new GenericType<List<Auction>>() {});
 		assertEquals(200, response.getStatus());
 	}
 	
