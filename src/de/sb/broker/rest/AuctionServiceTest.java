@@ -261,12 +261,13 @@ public class AuctionServiceTest extends ServiceTest {
 		return act;
 	}
 
-	protected static Bid createValidBid() {
-	//	Bid bd = new Bid (AuctionServiceTest.createValidAuction());
+/*	protected static Bid createValidBid() {
+	Bid rtn = new Bid(AuctionServiceTest.createValidAuction());
 		
-		//TODO
-		return bd;
+		
+	return rtn;
 	}
+*/
 	
 	protected static Person createValidPerson() {
 		byte[] a = new byte[32];
