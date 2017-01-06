@@ -329,23 +329,22 @@ public class PersonServiceTest extends ServiceTest {
 	public void testLifeCycle() {
 		WebTarget webTarget = newWebTarget("badUsername", "badPassword").path("people/");
 		assertEquals(200, webTarget.request().get().getStatus());
-
-		Person person = new Person();
-		person.setAlias("testPerson3");
 		
-		person.setAvatar(new Document("image/png", new byte[32], new byte[32]));
-		person.setContact(new Contact("test@test.de", "1234"));
-		person.setAddress(new Address("street", "12346", "Here"));
-		person.setName(new Name("foo", "bar"));
-
-
-		webTarget = newWebTarget("badUsername", "badPassword").path("people/");
-		final Invocation.Builder builder = webTarget.request();
-		builder.accept(MediaType.TEXT_PLAIN);
-		builder.header("Set-password", "password");
-		final Response response = builder.put(Entity.json(person));
+		long pID = generateTestPersonEntity();
+		this.getWasteBasket().add(pID);
 		
-		this.getWasteBasket().add(response.readEntity(Long.class));
+
+		Response response = newWebTarget("badUsername", "badUsername").path("people").request().accept(MediaType.APPLICATION_JSON).get();
+
+		assertEquals(200, response.getStatus());
+		
+		List<Person> l = response.readEntity(new GenericType<List<Person>>() {});
+		boolean idFound = false;
+		for(Person p : l){
+			if(p.getIdentity() == pID)
+				idFound = true;
+		}
+		assertTrue(idFound);
 	}
 	
 	protected long generateTestPersonEntity(){

@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import de.sb.broker.model.Address;
 import de.sb.broker.model.Auction;
+import de.sb.broker.model.Bid;
 import de.sb.broker.model.Contact;
 import de.sb.broker.model.Document;
 import de.sb.broker.model.Name;
@@ -283,7 +284,63 @@ public class AuctionServiceTest extends ServiceTest {
 	@Test
 	public void testBidRelations() {
 		
+		//Create new bid for Test-auction
+		Auction auctiontest = AuctionServiceTest.createValidAuction();
+		
+		WebTarget webTarget = newWebTarget("root", "root").path("auctions/");
+		final Invocation.Builder builder = webTarget.request();
+		builder.accept(MediaType.TEXT_PLAIN);
+		builder.header("Authorization", builder);
+		
+		Response auctionresponse = builder.put(Entity.json(auctiontest));
+		
+		getWasteBasket().add(auctionresponse.readEntity(Long.class));
+		
+		auctionresponse = newWebTarget("root", "root")
+				.path("auctions")
+				.request()
+				.accept(MediaType.APPLICATION_JSON)
+				.get();
+		/*Auction Testen
+		List<Auction> auctionList = auctionresponse.readEntity(new GenericType<List<Auction>>() {});
+		assertEquals(auctionList.get(0).getAskingPrice());
+		assertEquals(200, auctionresponse.getStatus());
+		
+		*/
+		
+		/*Bid Testen
+		Auction bid = AuctionServiceTest.createValidBid();
+		
+		webTarget = newWebTarget(null, null).path("auctions/");
+		final Invocation.Builder builder = webTarget.request();
+		builder.accept(MediaType.TEXT_PLAIN);
+		builder.header("Authorization", builder);
+		
+		response = builder.put(Entity.json(auction));
+		
+		getWasteBasket().add(response.readEntity(Long.class));
+		
+		*/
+		
 	}
+	
+	protected static Auction createValidAuction() {
+		Auction act = new Auction( PersonServiceTest.createValidPerson());
+		act.setUnitCount((short) 1);
+		act.setAskingPrice(100);
+		act.setClosureTimestamp(System.currentTimeMillis() + (30*24*60*60*1000));
+		act.setDescription("Test Auction");
+		
+		return act;
+	}
+
+/*	protected static Bid createValidBid() {
+	Bid rtn = new Bid(AuctionServiceTest.createValidAuction());
+		
+		
+	return rtn;
+	}
+*/
 	
 	protected static Person createValidPerson() {
 		byte[] a = new byte[32];
